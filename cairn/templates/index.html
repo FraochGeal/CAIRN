@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cairn - Your Supportive Chat Companion</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}"> <!-- Flask static file linking -->
+</head>
+<body>
+    <img id="logo" src="{{ url_for('static', filename='cairn_logo.png') }}" alt="Cairn Logo" /> <!-- Flask static image linking -->
+    <div class="chat-container">
+        <div class="messages" aria-live="polite">
+            <!-- No initial message will appear here -->
+        </div>
+        <div class="chat-input">
+            <input type="text" aria-label="Message input" placeholder="Type your message here..." onkeypress="if(event.keyCode === 13) sendMessage(this.value)">
+        </div>
+    </div>
+    <div class="disclaimer">
+        Welcome to CAIRN – a secluded space for young men to explore and express their feelings. This chat-based companion is designed to lend an ear and share words of encouragement 24/7. Here, in a judgment-free zone, you are free to discuss issues and seek comfort in conversation.<br><br>
+        While CAIRN is here to offer support, please be aware that this web application is not a substitute for professional counselling or clinical psychology. The insights and companionship provided are for informal support only. If you are in need of professional help, we strongly encourage you to contact a qualified healthcare provider.
+    </div>
+
+    <script>
+        async function sendMessage(message) {
+            const messagesContainer = document.querySelector('.messages');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.textContent = message;
+            messagesContainer.appendChild(userMessage);
+
+            document.querySelector('input[type="text"]').value = ''; // Clear input box
+
+            // Fetch response from server
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({message: message})
+            });
+            const responseData = await response.json();
+
+            // Create and append bot response
+            const botResponse = document.createElement('div');
+            botResponse.className = 'message bot-message';
+            botResponse.textContent = responseData.response;
+            messagesContainer.appendChild(botResponse);
+
+            // Scroll to the latest message
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
